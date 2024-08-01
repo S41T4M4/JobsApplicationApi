@@ -45,7 +45,7 @@ namespace JobApplication.Domain.Models
         [Column("data_criacao")]
         public DateTime data_criacao { get; set; } = DateTime.UtcNow;
 
-        // Navegação para a tabela de usuarios (opcional, para relacionar com o recrutador)
+        // Navegação para a tabela de usuarios
         [ForeignKey("id_recrutador")]
         public virtual Usuarios recrutador { get; set; }
     }

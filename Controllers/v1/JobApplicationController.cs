@@ -130,6 +130,7 @@ namespace JobApplication.Controllers.v1
             existingVaga.localizacao = vagasViewModel.Localizacao;
             existingVaga.status = vagasViewModel.Status;
             existingVaga.id_recrutador = vagasViewModel.IdRecrutador;
+            
             // Não atualiza a data_criacao
 
             // Salvar as alterações

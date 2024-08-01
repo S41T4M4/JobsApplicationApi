@@ -1,5 +1,6 @@
 ﻿using JobApplication.Infraestrutura;
 using JobApplication.Domain.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace JobApplication.Infraestrutura.Repositories
 {
@@ -140,7 +141,10 @@ namespace JobApplication.Infraestrutura.Repositories
             _connectionContext.Vaga.Update(existingVaga);
             _connectionContext.SaveChanges();
         }
-
+        public Usuarios GetUsuariosByEmail(string email)
+        {
+            return _connectionContext.Usuario.SingleOrDefault(u => u.email == email);
+        }
 
     }
 }

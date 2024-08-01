@@ -27,7 +27,7 @@ namespace JobApplication.Domain.Models
         [Column("data_candidatura")]
         public DateTime data_candidatura { get; set; } = DateTime.Now;
 
-        // Navegação para as tabelas de vagas e candidatos (opcional, para relacionar com as vagas e candidatos)
+        // Navegação para as tabelas de vagas e candidatos 
         [ForeignKey("id_vaga")]
         public virtual Vagas vaga { get; set; }
 

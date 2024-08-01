@@ -20,6 +20,8 @@
         void UpdateCandidaturas(Candidaturas candidatura);
         void DeleteCandidaturas(int id);
 
+        Usuarios GetUsuariosByEmail(string email);
+
 
     }
 }
