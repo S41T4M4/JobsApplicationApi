@@ -44,5 +44,6 @@ namespace JobApplication.Controllers
 
             return Ok(new { Message = token, perfil = user.perfil });
         }
+       
     }
 }

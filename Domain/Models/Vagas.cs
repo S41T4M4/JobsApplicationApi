@@ -48,5 +48,6 @@ namespace JobApplication.Domain.Models
         // Navegação para a tabela de usuarios
         [ForeignKey("id_recrutador")]
         public virtual Usuarios recrutador { get; set; }
+
     }
 }

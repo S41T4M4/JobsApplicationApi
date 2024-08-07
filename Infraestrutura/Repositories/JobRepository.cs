@@ -1,6 +1,7 @@
 ﻿using JobApplication.Infraestrutura;
 using JobApplication.Domain.Models;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Http.HttpResults;
 
 namespace JobApplication.Infraestrutura.Repositories
 {
@@ -146,5 +147,19 @@ namespace JobApplication.Infraestrutura.Repositories
             return _connectionContext.Usuario.SingleOrDefault(u => u.email == email);
         }
 
+        public List<Vagas> GetVagasByStatus(string status)
+        {
+            return _connectionContext.Vaga.Where(v => v.status == status).ToList();
+        }
+
+        public List<Vagas> GetVagasBySalario(int salario)
+        {
+            return _connectionContext.Vaga.Where(v => v.salario == salario).ToList();
+        }
+
+        public List<Vagas> GetVagasByIdRecrutador(int id_recrutador)
+        {
+            return _connectionContext.Vaga.Where(v => v.id_recrutador == id_recrutador).ToList();
+        }
     }
 }

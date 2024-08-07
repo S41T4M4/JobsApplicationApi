@@ -106,6 +106,19 @@ namespace JobApplication.Controllers.v1
             var vagas = _jobRepository.GetAllVagas();
             return Ok(vagas);
         }
+        [HttpGet("vagas/status/aberta")]
+        public IActionResult GetVagasByStatusAberta()
+        {
+            var vagasAbertas = _jobRepository.GetVagasByStatus("Aberta");
+            return Ok(vagasAbertas);
+        }
+        [HttpGet("vagas/status/fechada")]
+        public IActionResult GetVagasByStatusFechada()
+        {
+            var vagasFechadas = _jobRepository.GetVagasByStatus("Fechada");
+            return Ok(vagasFechadas);
+        }
+        
         [HttpPut("vagas/{id}")]
         public IActionResult UpdateVagas(int id, [FromBody] VagasViewModel vagasViewModel)
         {
@@ -238,6 +251,12 @@ namespace JobApplication.Controllers.v1
 
             _jobRepository.DeleteCandidaturas(id);
             return Ok(new { Message = "Candidatura excluída com sucesso." });
+        }
+        [HttpGet("vagas/{id_recrutador}")]
+        public IActionResult GetVagaByID(int id_recrutador)
+        {
+            var jobs = _jobRepository.GetVagasByIdRecrutador(id_recrutador);
+            return Ok(jobs);
         }
 
     }

@@ -13,6 +13,9 @@
         Vagas GetVagasById(int id);
         void UpdateVagas(Vagas vaga);
         void DeleteVagas(int id);
+        List<Vagas> GetVagasByStatus(string status);
+        List<Vagas> GetVagasBySalario(int salario);
+        List<Vagas> GetVagasByIdRecrutador(int id_recrutador);
 
         void AddCandidatura(Candidaturas candidatura);
         List<Candidaturas> GetAllCandidaturas();
@@ -21,6 +24,9 @@
         void DeleteCandidaturas(int id);
 
         Usuarios GetUsuariosByEmail(string email);
+
+        
+
 
 
     }
