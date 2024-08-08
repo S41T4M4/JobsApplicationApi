@@ -22,6 +22,7 @@
         Candidaturas GetCandidaturasById(int id);
         void UpdateCandidaturas(Candidaturas candidatura);
         void DeleteCandidaturas(int id);
+        List<Candidaturas> GetAllCandidaturasById(int id_vaga);
 
         Usuarios GetUsuariosByEmail(string email);
 

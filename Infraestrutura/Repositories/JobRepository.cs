@@ -28,6 +28,7 @@ namespace JobApplication.Infraestrutura.Repositories
 
         public void AddVagas(Vagas vaga)
         {
+            
             _connectionContext.Vaga.Add(vaga);
             _connectionContext.SaveChanges();
         }
@@ -160,6 +161,11 @@ namespace JobApplication.Infraestrutura.Repositories
         public List<Vagas> GetVagasByIdRecrutador(int id_recrutador)
         {
             return _connectionContext.Vaga.Where(v => v.id_recrutador == id_recrutador).ToList();
+        }
+
+        public List<Candidaturas> GetAllCandidaturasById(int id_vaga)
+        {
+            throw new NotImplementedException();
         }
     }
 }

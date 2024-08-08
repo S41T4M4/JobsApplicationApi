@@ -42,7 +42,7 @@ namespace JobApplication.Controllers
             var token = _tokenService.GenerateToken(user);
             _logger.LogInformation("Usuário autenticado com sucesso: {Email}", user.email);
 
-            return Ok(new { Message = token, perfil = user.perfil });
+            return Ok(new { Message = token, perfil = user.perfil , user.id});
         }
        
     }
