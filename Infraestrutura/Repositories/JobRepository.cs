@@ -167,5 +167,28 @@ namespace JobApplication.Infraestrutura.Repositories
         {
             throw new NotImplementedException();
         }
+
+
+        public List<Candidaturas> GetCandidaturasByIdRecrutador(int idRecrutador)
+        {
+            return _connectionContext.Candidatura
+                .Include(c => c.candidato)  // Inclui a entidade relacionada
+                .Include(c=> c.vaga)
+                .Where(c => c.vaga.id_recrutador == idRecrutador)
+                .ToList();
+        }
+
+        public List<Candidaturas> GetAllCandidaturasByIdCandidato(int id_candidato)
+        {
+            return _connectionContext.Candidatura.Where(c => c.id_candidato == id_candidato).ToList();
+
+
+        }
+
+        public bool CandidaturaExistente(int idVaga, int idCandidato)
+        {
+            
+            return _connectionContext.Candidatura.Any(c => c.id_vaga == idVaga && c.id_candidato == idCandidato);
+        }
     }
 }

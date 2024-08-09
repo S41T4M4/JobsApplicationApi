@@ -158,6 +158,12 @@ namespace JobApplication.Controllers.v1
             _jobRepository.DeleteVagas(id);
             return Ok();
         }
+        [HttpGet("candidaturasativas/{id_candidato}")]
+        public IActionResult GetCandidaturasByIdCandidato(int id_candidato)
+        {
+            var candidaturaId = _jobRepository.GetAllCandidaturasByIdCandidato(id_candidato);
+            return Ok(candidaturaId);
+        }
         // Método para candidatar-se a uma vaga
         [HttpPost("candidaturas")]
         public IActionResult ApplyForJob([FromBody] CandidaturasViewModel candidaturasViewModel)
@@ -167,7 +173,6 @@ namespace JobApplication.Controllers.v1
                 return BadRequest("A candidatura não pode ser nula.");
             }
 
-            // Verificar se a vaga e o candidato existem
             var vaga = _jobRepository.GetVagasById(candidaturasViewModel.IdVaga);
             var candidato = _jobRepository.GetUsuariosById(candidaturasViewModel.IdCandidato);
 
@@ -176,26 +181,35 @@ namespace JobApplication.Controllers.v1
                 return NotFound(new { Message = "Vaga não encontrada." });
             }
 
+            if (candidaturasViewModel.IdRecrutador == candidaturasViewModel.IdCandidato)
+            {
+                return NotFound(new { Message = "Um recrutador não pode se candidatar na sua própria vaga." });
+            }
+
             if (candidato == null)
             {
                 return NotFound(new { Message = "Candidato não encontrado." });
             }
 
-            // Converte o ViewModel para a entidade Candidaturas
+            // Verificar se a candidatura já existe
+            if (_jobRepository.CandidaturaExistente(candidaturasViewModel.IdVaga, candidaturasViewModel.IdCandidato))
+            {
+                return Conflict(new { Message = "Candidatura já existente para esta vaga." });
+            }
+
             var candidatura = new Candidaturas
             {
                 id_vaga = candidaturasViewModel.IdVaga,
                 id_candidato = candidaturasViewModel.IdCandidato,
-                status = candidaturasViewModel.Status ?? "Pendente", // Define um status padrão se não fornecido
-                data_candidatura = candidaturasViewModel.DataCandidatura ?? DateTime.UtcNow // Define a data atual se não fornecida
+                status = candidaturasViewModel.Status ?? "Pendente",
+                data_candidatura = candidaturasViewModel.DataCandidatura ?? DateTime.UtcNow
             };
 
-            // Adiciona a candidatura usando o repositório
             _jobRepository.AddCandidatura(candidatura);
 
-            // Retorna um status 201 Created com a candidatura criada
             return Ok();
         }
+
         // Método para obter uma candidatura pelo ID
         [HttpGet("candidaturas/{id}")]
         public IActionResult GetCandidaturaById(int id)
@@ -258,6 +272,32 @@ namespace JobApplication.Controllers.v1
             var jobs = _jobRepository.GetVagasByIdRecrutador(id_recrutador);
             return Ok(jobs);
         }
+        [HttpGet("recrutador/{id_recrutador}")]
+        public IActionResult GetCandidaturasByRecrutador(int id_recrutador)
+        {
+            var candidaturas = _jobRepository.GetCandidaturasByIdRecrutador(id_recrutador);
+            
+            if (candidaturas == null || candidaturas.Count == 0)
+            {
+                return NotFound("Nenhuma candidatura encontrada para o recrutador especificado.");
+            }
+
+            var viewModels = candidaturas.Select(c => new CandidaturasViewModel
+            {
+                Id = c.id,
+                IdVaga = c.id_vaga,
+                IdCandidato = c.id_candidato,
+                NomeCandidato = c.candidato.nome,  // Usando a propriedade 'nome' do modelo Usuarios
+                EmailCandidato = c.candidato.email,
+                TituloVaga = c.vaga.titulo,
+                Status = c.status,
+                DataCandidatura = c.data_candidatura
+            }).ToList();
+
+            return Ok(viewModels);
+        }
+        
+
 
     }
 }

@@ -23,10 +23,12 @@
         void UpdateCandidaturas(Candidaturas candidatura);
         void DeleteCandidaturas(int id);
         List<Candidaturas> GetAllCandidaturasById(int id_vaga);
-
+        List<Candidaturas> GetAllCandidaturasByIdCandidato(int id_candidato);
+        bool CandidaturaExistente(int idVaga, int idCandidato);
         Usuarios GetUsuariosByEmail(string email);
+        List<Candidaturas> GetCandidaturasByIdRecrutador(int id_recrutador);
 
-        
+
 
 
 

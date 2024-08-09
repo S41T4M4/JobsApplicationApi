@@ -11,7 +11,7 @@ namespace JobApplication.Infraestrutura
            : base(options)
         {
         }
-
+        //String de conexão 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
          => optionsBuilder.UseNpgsql(
              "Server=localhost;" +

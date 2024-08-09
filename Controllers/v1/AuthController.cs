@@ -41,6 +41,7 @@ namespace JobApplication.Controllers
             // Gera um token para o usuário autenticado.
             var token = _tokenService.GenerateToken(user);
             _logger.LogInformation("Usuário autenticado com sucesso: {Email}", user.email);
+            // Retorna o tipo de perfil para que se entenda se o usuário é Candidato ou Recrutador
 
             return Ok(new { Message = token, perfil = user.perfil , user.id});
         }
