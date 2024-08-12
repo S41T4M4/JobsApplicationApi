@@ -1,4 +1,6 @@
-﻿namespace JobApplication.Domain.Models
+﻿using Microsoft.AspNetCore.SignalR;
+
+namespace JobApplication.Domain.Models
 {
     public interface IJobRepository
     {
@@ -14,7 +16,7 @@
         void UpdateVagas(Vagas vaga);
         void DeleteVagas(int id);
         List<Vagas> GetVagasByStatus(string status);
-        List<Vagas> GetVagasBySalario(int salario);
+        List<Vagas> GetVagasBySalario(double salario);
         List<Vagas> GetVagasByIdRecrutador(int id_recrutador);
 
         void AddCandidatura(Candidaturas candidatura);
@@ -27,6 +29,8 @@
         bool CandidaturaExistente(int idVaga, int idCandidato);
         Usuarios GetUsuariosByEmail(string email);
         List<Candidaturas> GetCandidaturasByIdRecrutador(int id_recrutador);
+        List<Candidaturas> GetCandidaturasByIdVaga(int id_vaga);
+        void UpdateStatusCandidaturas(Candidaturas status);
 
 
 

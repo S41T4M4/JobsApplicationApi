@@ -26,7 +26,7 @@ namespace JobApplication.Domain.Models
 
         [Required]
         [Column("salario")]
-        public decimal salario { get; set; }
+        public double salario { get; set; }
 
         [Required]
         [Column("localizacao")]

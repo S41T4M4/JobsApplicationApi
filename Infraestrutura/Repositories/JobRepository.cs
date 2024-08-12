@@ -153,7 +153,7 @@ namespace JobApplication.Infraestrutura.Repositories
             return _connectionContext.Vaga.Where(v => v.status == status).ToList();
         }
 
-        public List<Vagas> GetVagasBySalario(int salario)
+        public List<Vagas> GetVagasBySalario(double salario)
         {
             return _connectionContext.Vaga.Where(v => v.salario == salario).ToList();
         }
@@ -180,15 +180,38 @@ namespace JobApplication.Infraestrutura.Repositories
 
         public List<Candidaturas> GetAllCandidaturasByIdCandidato(int id_candidato)
         {
-            return _connectionContext.Candidatura.Where(c => c.id_candidato == id_candidato).ToList();
-
-
+            return _connectionContext.Candidatura
+                .Include(c => c.vaga)            
+                .Where(c => c.id_candidato == id_candidato)
+                .ToList();
         }
 
         public bool CandidaturaExistente(int idVaga, int idCandidato)
         {
             
             return _connectionContext.Candidatura.Any(c => c.id_vaga == idVaga && c.id_candidato == idCandidato);
+        }
+
+        public List<Candidaturas> GetCandidaturasByIdVaga(int id_vaga)
+        {
+            return _connectionContext.Candidatura.Where(c => c.id_vaga == id_vaga).ToList();
+        }
+
+        public void UpdateStatusCandidaturas(Candidaturas candidaturas)
+        {
+            var existingCandidatura = _connectionContext.Candidatura.Find(candidaturas.id);
+            if (existingCandidatura != null)
+            {
+                existingCandidatura.status = candidaturas.status;
+                existingCandidatura.data_candidatura = candidaturas.data_candidatura.ToUniversalTime();
+                _connectionContext.Candidatura.Update(existingCandidatura);
+                _connectionContext.SaveChanges();
+            }
+            else
+            {
+                throw new Exception("Candidatura não existe");
+            }
+
         }
     }
 }

@@ -158,7 +158,7 @@ namespace JobApplication.Controllers.v1
             _jobRepository.DeleteVagas(id);
             return Ok();
         }
-        [HttpGet("candidaturasativas/{id_candidato}")]
+        [HttpGet("candidaturasPorCandidato/{id_candidato}")]
         public IActionResult GetCandidaturasByIdCandidato(int id_candidato)
         {
             var candidaturaId = _jobRepository.GetAllCandidaturasByIdCandidato(id_candidato);
@@ -296,7 +296,41 @@ namespace JobApplication.Controllers.v1
 
             return Ok(viewModels);
         }
-        
+        [HttpGet("candidatos/{id_vaga}")]
+        public IActionResult GetCandidatosByVagas(int id_vaga)
+        {
+            var candidato = _jobRepository.GetCandidaturasByIdVaga(id_vaga);
+            if (candidato == null)
+            {
+                return NotFound("Não existe a vaga");
+            }
+            return Ok(candidato);
+        }
+        [HttpPut("candidaturas/status/{id}")]
+        public IActionResult UpdateStatusCandidatura(int id, [FromBody] UpdateCandidaturaStatusViewModel statusViewModel)
+        {
+            if (statusViewModel == null || string.IsNullOrEmpty(statusViewModel.Status))
+            {
+                return BadRequest("O status da candidatura não pode ser nulo ou vazio.");
+            }
+           
+
+            var existingCandidatura = _jobRepository.GetCandidaturasById(id);
+            if (existingCandidatura == null)
+            {
+                return NotFound(new { Message = "Candidatura não encontrada." });
+            }
+            
+            // Atualiza apenas o status da candidatura
+            existingCandidatura.status = statusViewModel.Status;
+            existingCandidatura.data_candidatura = statusViewModel.DataCandidatura ?? existingCandidatura.data_candidatura;
+
+            _jobRepository.UpdateStatusCandidaturas(existingCandidatura);
+
+            return Ok(new { Message = "Status da candidatura atualizado com sucesso." });
+        }
+
+
 
 
     }
