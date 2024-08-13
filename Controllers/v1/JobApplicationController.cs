@@ -201,7 +201,7 @@ namespace JobApplication.Controllers.v1
             {
                 id_vaga = candidaturasViewModel.IdVaga,
                 id_candidato = candidaturasViewModel.IdCandidato,
-                status = candidaturasViewModel.Status ?? "Pendente",
+                status = "Pendente",
                 data_candidatura = candidaturasViewModel.DataCandidatura ?? DateTime.UtcNow
             };
 
