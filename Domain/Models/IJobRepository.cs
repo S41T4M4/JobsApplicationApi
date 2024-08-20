@@ -31,8 +31,8 @@ namespace JobApplication.Domain.Models
         List<Candidaturas> GetCandidaturasByIdRecrutador(int id_recrutador);
         List<Candidaturas> GetCandidaturasByIdVaga(int id_vaga);
         void UpdateStatusCandidaturas(Candidaturas status);
-
-
+        
+        bool CandidaturasExistemParaVaga(int idVaga);
 
 
 

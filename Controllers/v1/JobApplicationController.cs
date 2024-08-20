@@ -2,7 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using JobApplication.ViewModels;
 using JobApplication.Infraestrutura.Repositories;
-using JobApplication.Domain.Models;
+
 
 namespace JobApplication.Controllers.v1
 {
@@ -17,7 +17,7 @@ namespace JobApplication.Controllers.v1
         {
             _jobRepository = jobRepository;
         }
-        [HttpPost("usuarios")]
+        [HttpPost("cadastro/usuarios")]
         public IActionResult AddUser([FromBody] UsuariosViewModel usuariosView)
         {
             if (usuariosView == null)
@@ -25,7 +25,7 @@ namespace JobApplication.Controllers.v1
                 return BadRequest("O usuário não pode ser nulo.");
             }
 
-            // Converte o ViewModel para a entidade Usuario
+            //Body requisitado para criação de usuario
             var usuario = new Usuarios
             {
                 nome = usuariosView.Nome,
@@ -37,12 +37,13 @@ namespace JobApplication.Controllers.v1
             // Adiciona o usuário usando o repositório
             _jobRepository.AddUsuarios(usuario);
 
-            // Retorna um status 201 Created com o usuário criado
+            
             return Ok();
         }
         [HttpGet("usuarios")]
         public IActionResult GetUsers()
         {
+            //Retorna lista de usuarios
             var users = _jobRepository.GetAllUsuarios();
             return Ok(users);
         }
@@ -51,8 +52,10 @@ namespace JobApplication.Controllers.v1
         {
             // Recuperar o usuário existente pelo Id
             var existingUser = _jobRepository.GetUsuariosById(id);
+            
             if (existingUser == null)
             {
+                
                 return NotFound(new { Message = "Usuário não encontrado" });
             }
 
@@ -62,7 +65,7 @@ namespace JobApplication.Controllers.v1
             existingUser.senha = usuariosView.Senha;
             existingUser.perfil = usuariosView.Perfil;
 
-            // Salvar as alterações
+            
             _jobRepository.UpdateUsuarios(existingUser);
 
             return Ok(new { Message = "Usuário atualizado com sucesso" });
@@ -81,7 +84,7 @@ namespace JobApplication.Controllers.v1
                 return BadRequest("A vaga não pode ser nula.");
             }
 
-            // Converte o ViewModel para a entidade Vagas
+            //Body de requisição para a criação de vagas
             var vaga = new Vagas
             {
                 titulo = vagasView.Titulo,
@@ -91,13 +94,22 @@ namespace JobApplication.Controllers.v1
                 localizacao = vagasView.Localizacao,
                 status = vagasView.Status,
                 id_recrutador = vagasView.IdRecrutador,
-                // data_criacao será definida no modelo
+                // data_criacao
+                //Data gerada automaticamente
             };
+            try
+            {
+                _jobRepository.AddVagas(vaga);
+            }
+            catch (Exception )
+            {
+                return BadRequest("Houve um erro");
+            }
 
             // Adiciona a vaga usando o repositório
-            _jobRepository.AddVagas(vaga);
 
-            // Retorna um status 201 Created com a vaga criada
+
+
             return Ok();
         }
         [HttpGet("vagas")]
@@ -109,12 +121,14 @@ namespace JobApplication.Controllers.v1
         [HttpGet("vagas/status/aberta")]
         public IActionResult GetVagasByStatusAberta()
         {
+            //Retorna apenas vagas abertas
             var vagasAbertas = _jobRepository.GetVagasByStatus("Aberta");
             return Ok(vagasAbertas);
         }
         [HttpGet("vagas/status/fechada")]
         public IActionResult GetVagasByStatusFechada()
         {
+            //Retorna apenas vagas fechadas
             var vagasFechadas = _jobRepository.GetVagasByStatus("Fechada");
             return Ok(vagasFechadas);
         }
@@ -122,20 +136,20 @@ namespace JobApplication.Controllers.v1
         [HttpPut("vagas/{id}")]
         public IActionResult UpdateVagas(int id, [FromBody] VagasViewModel vagasViewModel)
         {
-            // Verificar se o ViewModel é nulo
+            
             if (vagasViewModel == null)
             {
                 return BadRequest("Os dados da vaga não podem ser nulos.");
             }
 
-            // Recuperar a vaga existente pelo Id
+            //Procurar a vaga pelo id da vaga
             var existingVaga = _jobRepository.GetVagasById(id);
             if (existingVaga == null)
             {
                 return NotFound(new { Message = "Vaga não encontrada" });
             }
 
-            // Atualizar as propriedades da vaga com as informações do ViewModel
+            //Body de atualização da vaga
             existingVaga.titulo = vagasViewModel.Titulo;
             existingVaga.descricao = vagasViewModel.Descricao;
             existingVaga.requisitos = vagasViewModel.Requisitos;
@@ -143,8 +157,8 @@ namespace JobApplication.Controllers.v1
             existingVaga.localizacao = vagasViewModel.Localizacao;
             existingVaga.status = vagasViewModel.Status;
             existingVaga.id_recrutador = vagasViewModel.IdRecrutador;
-            
-            // Não atualiza a data_criacao
+            //data_criacao
+            // É mantido a data de criação da vaga
 
             // Salvar as alterações
             _jobRepository.UpdateVagas(existingVaga);
@@ -155,9 +169,16 @@ namespace JobApplication.Controllers.v1
         [HttpDelete("vagas/{id}")]
         public IActionResult DeleteVagas(int id)
         {
+            // Verificar se existem candidaturas associadas à vaga
+            if (_jobRepository.CandidaturasExistemParaVaga(id))
+            {
+                return BadRequest(new { Message = "Não é possível excluir a vaga, pois existem candidaturas associadas a ela." });
+            }
+
             _jobRepository.DeleteVagas(id);
-            return Ok();
+            return Ok(new { Message = "Vaga excluída com sucesso." });
         }
+
         [HttpGet("candidaturasPorCandidato/{id_candidato}")]
         public IActionResult GetCandidaturasByIdCandidato(int id_candidato)
         {
@@ -180,7 +201,7 @@ namespace JobApplication.Controllers.v1
             {
                 return NotFound(new { Message = "Vaga não encontrada." });
             }
-
+            //Se o perfil do candidato for Recrutador ele não irá conseguir se candidatar a vaga
             if (candidaturasViewModel.IdRecrutador == candidaturasViewModel.IdCandidato)
             {
                 return NotFound(new { Message = "Um recrutador não pode se candidatar na sua própria vaga." });
@@ -191,7 +212,7 @@ namespace JobApplication.Controllers.v1
                 return NotFound(new { Message = "Candidato não encontrado." });
             }
 
-            // Verificar se a candidatura já existe
+            // Verificar se o candidato já se candidatou a vaga 
             if (_jobRepository.CandidaturaExistente(candidaturasViewModel.IdVaga, candidaturasViewModel.IdCandidato))
             {
                 return Conflict(new { Message = "Candidatura já existente para esta vaga." });
@@ -201,6 +222,7 @@ namespace JobApplication.Controllers.v1
             {
                 id_vaga = candidaturasViewModel.IdVaga,
                 id_candidato = candidaturasViewModel.IdCandidato,
+                //Ao se candidatar o Status Pendente é colocado
                 status = "Pendente",
                 data_candidatura = candidaturasViewModel.DataCandidatura ?? DateTime.UtcNow
             };
@@ -246,7 +268,7 @@ namespace JobApplication.Controllers.v1
             existingCandidatura.id_vaga = candidaturasViewModel.IdVaga;
             existingCandidatura.id_candidato = candidaturasViewModel.IdCandidato;
             existingCandidatura.status = candidaturasViewModel.Status;
-            existingCandidatura.data_candidatura = candidaturasViewModel.DataCandidatura ?? existingCandidatura.data_candidatura;
+           // existingCandidatura.data_candidatura = candidaturasViewModel.DataCandidatura ?? existingCandidatura.data_candidatura;
 
             // Atualiza a candidatura no repositório
 
@@ -272,10 +294,10 @@ namespace JobApplication.Controllers.v1
             var jobs = _jobRepository.GetVagasByIdRecrutador(id_recrutador);
             return Ok(jobs);
         }
-        [HttpGet("recrutador/{id_recrutador}")]
-        public IActionResult GetCandidaturasByRecrutador(int id_recrutador)
+        [HttpGet("candidatos/{id_vaga}")]
+        public IActionResult GetCandidaturasByVaga(int id_vaga)
         {
-            var candidaturas = _jobRepository.GetCandidaturasByIdRecrutador(id_recrutador);
+            var candidaturas = _jobRepository.GetCandidaturasByIdVaga(id_vaga);
             
             if (candidaturas == null || candidaturas.Count == 0)
             {
@@ -296,16 +318,7 @@ namespace JobApplication.Controllers.v1
 
             return Ok(viewModels);
         }
-        [HttpGet("candidatos/{id_vaga}")]
-        public IActionResult GetCandidatosByVagas(int id_vaga)
-        {
-            var candidato = _jobRepository.GetCandidaturasByIdVaga(id_vaga);
-            if (candidato == null)
-            {
-                return NotFound("Não existe a vaga");
-            }
-            return Ok(candidato);
-        }
+       
         [HttpPut("candidaturas/status/{id}")]
         public IActionResult UpdateStatusCandidatura(int id, [FromBody] UpdateCandidaturaStatusViewModel statusViewModel)
         {
@@ -313,14 +326,14 @@ namespace JobApplication.Controllers.v1
             {
                 return BadRequest("O status da candidatura não pode ser nulo ou vazio.");
             }
-           
+
 
             var existingCandidatura = _jobRepository.GetCandidaturasById(id);
             if (existingCandidatura == null)
             {
                 return NotFound(new { Message = "Candidatura não encontrada." });
             }
-            
+
             // Atualiza apenas o status da candidatura
             existingCandidatura.status = statusViewModel.Status;
             existingCandidatura.data_candidatura = statusViewModel.DataCandidatura ?? existingCandidatura.data_candidatura;
@@ -329,6 +342,7 @@ namespace JobApplication.Controllers.v1
 
             return Ok(new { Message = "Status da candidatura atualizado com sucesso." });
         }
+      
 
 
 
