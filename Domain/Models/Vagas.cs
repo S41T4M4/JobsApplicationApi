@@ -26,6 +26,7 @@ namespace JobApplication.Domain.Models
 
         [Required]
         [Column("salario")]
+        [MaxLength(10)]
         public double salario { get; set; }
 
         [Required]

@@ -153,7 +153,10 @@ namespace JobApplication.Infraestrutura.Repositories
             existingVaga.localizacao = vaga.localizacao;
             existingVaga.status = vaga.status;
             existingVaga.id_recrutador = vaga.id_recrutador;
-            existingVaga.data_criacao = existingVaga.data_criacao.ToUniversalTime();  //Conversão no formato de Data
+            existingVaga.data_criacao = existingVaga.data_criacao.ToUniversalTime();
+
+
+         
 
             _connectionContext.Vaga.Update(existingVaga);
             _connectionContext.SaveChanges();

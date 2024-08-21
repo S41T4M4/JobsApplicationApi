@@ -94,23 +94,28 @@ namespace JobApplication.Controllers.v1
                 localizacao = vagasView.Localizacao,
                 status = vagasView.Status,
                 id_recrutador = vagasView.IdRecrutador,
-                // data_criacao
+                // data_criacao = vagasView.DataCriacao
                 //Data gerada automaticamente
+
             };
-            try
+
+            if (vagasView.Salario > 99999)
+            {
+                return BadRequest("Não é possivel adicionar um salário nesse valor");
+            }
+            else if (vagasView.Salario == 0)
+            {
+                return BadRequest("Não é possivel adicionar um salário nesse valor");
+            }
+            else if (vagasView.Salario < 0)
+            {
+                return BadRequest("Não é possivel adicionar um salário nesse valor");
+            }
+            else
             {
                 _jobRepository.AddVagas(vaga);
+                return Ok();
             }
-            catch (Exception )
-            {
-                return BadRequest("Houve um erro");
-            }
-
-            // Adiciona a vaga usando o repositório
-
-
-
-            return Ok();
         }
         [HttpGet("vagas")]
         public IActionResult GetAllVagas()
@@ -157,13 +162,31 @@ namespace JobApplication.Controllers.v1
             existingVaga.localizacao = vagasViewModel.Localizacao;
             existingVaga.status = vagasViewModel.Status;
             existingVaga.id_recrutador = vagasViewModel.IdRecrutador;
+
+            if (vagasViewModel.Salario > 99999)
+            {
+                return BadRequest("Não é possivel adicionar um salário nesse valor");
+            }
+            else if (vagasViewModel.Salario == 0)
+            {
+                return BadRequest("Não é possivel adicionar um salário nesse valor");
+            }
+            else if(vagasViewModel.Salario < 0)
+            {
+                return BadRequest("Não é possivel adicionar um salário nesse valor");
+            }
+            else
+            {
+                _jobRepository.UpdateVagas(existingVaga);
+
+                return Ok(new { Message = "Vaga atualizada com sucesso" });
+
+            }
             //data_criacao
             // É mantido a data de criação da vaga
 
-            // Salvar as alterações
-            _jobRepository.UpdateVagas(existingVaga);
-
-            return Ok(new { Message = "Vaga atualizada com sucesso" });
+            
+           
         }
 
         [HttpDelete("vagas/{id}")]
