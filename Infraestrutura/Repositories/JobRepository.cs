@@ -15,6 +15,10 @@ namespace JobApplication.Infraestrutura.Repositories
         {
             _connectionContext = connectionContext;
         }
+        public Empresas GetEmpresaByCnpj(string cnpj)
+        {
+            return _connectionContext.Empresa.SingleOrDefault(e => e.cnpj == cnpj);
+        }
 
         // Método para adicionar uma nova candidatura ao banco de dados
         public void AddCandidatura(Candidaturas candidatura)
@@ -23,11 +27,25 @@ namespace JobApplication.Infraestrutura.Repositories
             _connectionContext.SaveChanges();
         }
 
-        // Método para adicionar um novo usuário ao banco de dados
-        public void AddUsuarios(Usuarios usuario)
+        public void AddEmpresa(Empresas empresa)
         {
-            _connectionContext.Usuario.Add(usuario);
+            _connectionContext.Empresa.Add(empresa);
             _connectionContext.SaveChanges();
+        }
+
+        // Método para adicionar um novo usuário ao banco de dados
+        public void AddUsuarios(Usuarios usuario )
+        {
+           
+                var usuarioExistente = GetUsuariosByEmail(usuario.email);
+                if (usuarioExistente != null)
+                {
+                    throw new Exception("Usuário já existe.");
+                }
+
+                _connectionContext.Usuario.Add(usuario);
+                _connectionContext.SaveChanges();
+         
         }
 
         // Método para adicionar uma nova vaga ao banco de dados
@@ -175,7 +193,7 @@ namespace JobApplication.Infraestrutura.Repositories
         }
 
         // Método para retornar vagas com um salario especifico
-        public List<Vagas> GetVagasBySalario(double salario)
+        public List<Vagas> GetVagasBySalario(decimal salario)
         {
             return _connectionContext.Vaga.Where(v => v.salario == salario).ToList();
         }
@@ -248,6 +266,7 @@ namespace JobApplication.Infraestrutura.Repositories
         {
             return _connectionContext.Candidatura.Any(c => c.id_vaga == idVaga);
         }
+
     }
 }
 

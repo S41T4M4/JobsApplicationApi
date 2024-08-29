@@ -17,6 +17,7 @@ namespace JobApplication.Controllers.v1
         {
             _jobRepository = jobRepository;
         }
+        // Método para adicionar um novo usuário
         [HttpPost("cadastro/usuarios")]
         public IActionResult AddUser([FromBody] UsuariosViewModel usuariosView)
         {
@@ -25,21 +26,109 @@ namespace JobApplication.Controllers.v1
                 return BadRequest("O usuário não pode ser nulo.");
             }
 
-            //Body requisitado para criação de usuario
+            var usuarioExistente = _jobRepository.GetUsuariosByEmail(usuariosView.Email);
+
+            if (usuarioExistente != null)
+            {
+                return BadRequest("Usuário já existe.");
+            }
+
+            // Verifica se o perfil é 'Recrutador' e valida o CNPJ
+            if (usuariosView.Perfil == "Recrutador")
+            {
+                if (usuariosView.EmpresaId == null || usuariosView.EmpresaId <= 0)
+                {
+                    // Se o CNPJ for fornecido, verifique se a empresa já existe
+                    if (!string.IsNullOrEmpty(usuariosView.Cnpj))
+                    {
+                        var empresaExistente = _jobRepository.GetEmpresaByCnpj(usuariosView.Cnpj);
+
+                        if (empresaExistente == null)
+                        {
+                            // Cria uma nova empresa se não existir
+                            var novaEmpresa = new Empresas
+                            {
+                                nome = usuariosView.NomeEmpresa,
+                                cnpj = usuariosView.Cnpj
+                            };
+
+                            try
+                            {
+                                _jobRepository.AddEmpresa(novaEmpresa);
+                                usuariosView.EmpresaId = novaEmpresa.id; // Atualiza o ID da empresa
+                            }
+                            catch (Exception ex)
+                            {
+                                return StatusCode(500, $"Erro ao criar a empresa: {ex.Message}");
+                            }
+                        }
+                        else
+                        {
+                            usuariosView.EmpresaId = empresaExistente.id; // Usa o ID da empresa existente
+                        }
+                    }
+                    else
+                    {
+                        return BadRequest("Recrutadores devem fornecer o CNPJ da empresa.");
+                    }
+                }
+            }
+
             var usuario = new Usuarios
             {
                 nome = usuariosView.Nome,
                 email = usuariosView.Email,
                 senha = usuariosView.Senha,
-                perfil = usuariosView.Perfil
+                perfil = usuariosView.Perfil,
+                empresa_id = usuariosView.EmpresaId
             };
 
-            // Adiciona o usuário usando o repositório
-            _jobRepository.AddUsuarios(usuario);
-
-            
-            return Ok();
+            try
+            {
+                _jobRepository.AddUsuarios(usuario);
+                return Ok("Usuário adicionado com sucesso.");
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Erro ao adicionar o usuário: {ex.Message}");
+            }
         }
+
+        // Método para adicionar uma nova empresa
+        [HttpPost("empresas")]
+        public IActionResult AddEmpresa([FromBody] EmpresasViewModel empresasView)
+        {
+            if (empresasView == null)
+            {
+                return BadRequest("O formato não pode ser nulo.");
+            }
+
+            var empresaExistente = _jobRepository.GetEmpresaByCnpj(empresasView.Cnpj);
+
+            if (empresaExistente != null)
+            {
+                return BadRequest("Já existe uma empresa com este CNPJ.");
+            }
+
+            var empresa = new Empresas
+            {
+                nome = empresasView.Name,
+                cnpj = empresasView.Cnpj
+            };
+
+            try
+            {
+                _jobRepository.AddEmpresa(empresa);
+                return Ok("Empresa adicionada com sucesso.");
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Erro ao adicionar a empresa: {ex.Message}");
+            }
+        }
+
+
+
         [HttpGet("usuarios")]
         public IActionResult GetUsers()
         {
@@ -98,6 +187,25 @@ namespace JobApplication.Controllers.v1
                 //Data gerada automaticamente
 
             };
+            if (string.IsNullOrWhiteSpace(vagasView.Titulo))
+            {
+                return BadRequest("O titulo não pode ser vazio !");
+            }
+
+            if (string.IsNullOrWhiteSpace(vagasView.Descricao))
+            {
+                return BadRequest("A descrição não pode ser vazia !");
+            }
+
+            if (string.IsNullOrWhiteSpace(vagasView.Requisitos))
+            {
+                return BadRequest("Os requisitos não podem ser vazios !");
+            }
+
+            if (string.IsNullOrWhiteSpace(vagasView.Localizacao))
+            {
+                return BadRequest("A localização não pode ser vazia");
+            }
 
             if (vagasView.Salario > 99999)
             {
@@ -107,7 +215,7 @@ namespace JobApplication.Controllers.v1
             {
                 return BadRequest("Não é possivel adicionar um salário nesse valor");
             }
-            else if (vagasView.Salario < 0)
+            else if (vagasView.Salario < 499)
             {
                 return BadRequest("Não é possivel adicionar um salário nesse valor");
             }
@@ -141,11 +249,7 @@ namespace JobApplication.Controllers.v1
         [HttpPut("vagas/{id}")]
         public IActionResult UpdateVagas(int id, [FromBody] VagasViewModel vagasViewModel)
         {
-            
-            if (vagasViewModel == null)
-            {
-                return BadRequest("Os dados da vaga não podem ser nulos.");
-            }
+
 
             //Procurar a vaga pelo id da vaga
             var existingVaga = _jobRepository.GetVagasById(id);
@@ -163,15 +267,36 @@ namespace JobApplication.Controllers.v1
             existingVaga.status = vagasViewModel.Status;
             existingVaga.id_recrutador = vagasViewModel.IdRecrutador;
 
+            if (vagasViewModel == null)
+            {
+                return BadRequest("Os dados da vaga não podem ser nulos.");
+            }
+            if (string.IsNullOrWhiteSpace(vagasViewModel.Titulo))
+            {
+                return BadRequest("O titulo não pode ser vazio !");
+            }
+
+            if (string.IsNullOrWhiteSpace(vagasViewModel.Descricao))
+            {
+                return BadRequest("A descrição não pode ser vazia !");
+            }
+
+            if (string.IsNullOrWhiteSpace(vagasViewModel.Requisitos))
+            {
+                return BadRequest("Os requisitos não podem ser vazios !");
+            }
+
+            if (string.IsNullOrWhiteSpace(vagasViewModel.Localizacao))
+            {
+                return BadRequest("A localização não pode ser vazia");
+            }
+
             if (vagasViewModel.Salario > 99999)
             {
-                return BadRequest("Não é possivel adicionar um salário nesse valor");
+                return BadRequest("Não é possivel adicionar um salário maior do que R$99.999");
             }
-            else if (vagasViewModel.Salario == 0)
-            {
-                return BadRequest("Não é possivel adicionar um salário nesse valor");
-            }
-            else if(vagasViewModel.Salario < 0)
+      
+            else if(vagasViewModel.Salario < 499)
             {
                 return BadRequest("Não é possivel adicionar um salário nesse valor");
             }
@@ -332,7 +457,7 @@ namespace JobApplication.Controllers.v1
                 Id = c.id,
                 IdVaga = c.id_vaga,
                 IdCandidato = c.id_candidato,
-                NomeCandidato = c.candidato.nome,  // Usando a propriedade 'nome' do modelo Usuarios
+                NomeCandidato = c.candidato.nome,          // Usando a propriedade 'nome' do modelo Usuarios
                 EmailCandidato = c.candidato.email,
                 TituloVaga = c.vaga.titulo,
                 Status = c.status,

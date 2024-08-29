@@ -7,6 +7,7 @@ namespace JobApplication.Infraestrutura
         public DbSet<Usuarios> Usuario { get; set; }
         public DbSet<Vagas> Vaga { get; set; }
         public DbSet<Candidaturas> Candidatura { get; set; }
+        public DbSet<Empresas> Empresa { get; set; }
         public ConnectionContext(DbContextOptions<ConnectionContext> options)
            : base(options)
         {

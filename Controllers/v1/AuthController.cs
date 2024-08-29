@@ -43,7 +43,7 @@ namespace JobApplication.Controllers
             _logger.LogInformation("Usuário autenticado com sucesso: {Email}", user.email);
             // Retorna o tipo de perfil para que se entenda se o usuário é Candidato ou Recrutador
 
-            return Ok(new { Message = token, perfil = user.perfil , user.id});
+            return Ok(new { Message = token, perfil = user.perfil , user.id, user.nome});
         }
        
     }

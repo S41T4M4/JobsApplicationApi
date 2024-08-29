@@ -11,7 +11,7 @@ namespace JobApplication.ViewModels
         [JsonPropertyName("requisitos")]
         public string Requisitos { get; set; }
         [JsonPropertyName("salario")]
-        public double Salario { get; set; }
+        public decimal Salario { get; set; }
         [JsonPropertyName("localizacao")]
         public string Localizacao { get; set; }
         [JsonPropertyName("status")]
