@@ -33,5 +33,8 @@ namespace JobApplication.Domain.Models
 
         [ForeignKey("id_candidato")]
         public virtual Usuarios candidato { get; set; }
+
+
+       
     }
 }

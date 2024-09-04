@@ -24,7 +24,7 @@ namespace JobApplication.Controllers
         [HttpPost("login")]
         public IActionResult Auth([FromBody] LoginViewModel loginViewModel)
         {
-            if (loginViewModel == null || string.IsNullOrEmpty(loginViewModel.Email) || string.IsNullOrEmpty(loginViewModel.Senha) || string.IsNullOrEmpty(loginViewModel.Perfil))
+            if (loginViewModel == null || string.IsNullOrEmpty(loginViewModel.Email) || string.IsNullOrEmpty(loginViewModel.Senha))
             {
                 _logger.LogWarning("Credenciais inválidas fornecidas.");
                 return BadRequest("Credenciais inválidas.");
@@ -32,19 +32,31 @@ namespace JobApplication.Controllers
 
             var user = _jobRepository.GetUsuariosByEmail(loginViewModel.Email);
 
-            if (user == null || user.senha != loginViewModel.Senha || user.perfil != loginViewModel.Perfil)
+            if (user == null || user.senha != loginViewModel.Senha)
             {
                 _logger.LogWarning("Tentativa de login falhou para o email: {Email}", loginViewModel.Email);
                 return Unauthorized("Email ou senha inválidos.");
             }
 
-            // Gera um token para o usuário autenticado.
-            var token = _tokenService.GenerateToken(user);
-            _logger.LogInformation("Usuário autenticado com sucesso: {Email}", user.email);
-            // Retorna o tipo de perfil para que se entenda se o usuário é Candidato ou Recrutador
+            // Determine o perfil do usuário
+            bool isRecrutador = user.Empresa != null;
 
-            return Ok(new { Message = token, perfil = user.perfil , user.id, user.nome});
+            // Se o usuário for um recrutador, verifique o CNPJ
+            if (isRecrutador)
+            {
+                if (string.IsNullOrEmpty(loginViewModel.Cnpj) || user.Empresa.cnpj != loginViewModel.Cnpj)
+                {
+                    _logger.LogWarning("CNPJ inválido fornecido para o recrutador: {Email}", loginViewModel.Email);
+                    return Unauthorized("CNPJ inválido.");
+                }
+            }
+
+            // Gera um token para o usuário autenticado
+            var token = _tokenService.GenerateToken(user);
+            _logger.LogInformation("Usuário autenticado com sucesso: {Email}, Perfil: {Perfil}", user.email, isRecrutador ? "Recrutador" : "Candidato");
+
+            // Retorna o tipo de perfil junto com o token
+            return Ok(new { Message = token, perfil = isRecrutador ? "Recrutador" : "Candidato", user.id, user.nome, Cnpj = user.Empresa?.cnpj, user.empresa_id });
         }
-       
     }
 }

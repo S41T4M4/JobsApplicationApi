@@ -15,9 +15,14 @@ namespace JobApplication.Infraestrutura.Repositories
         {
             _connectionContext = connectionContext;
         }
+     
         public Empresas GetEmpresaByCnpj(string cnpj)
         {
             return _connectionContext.Empresa.SingleOrDefault(e => e.cnpj == cnpj);
+        }
+        public List<Empresas> GetAllEmpresas()
+        {
+           return _connectionContext.Empresa.ToList();
         }
 
         // Método para adicionar uma nova candidatura ao banco de dados
@@ -54,6 +59,10 @@ namespace JobApplication.Infraestrutura.Repositories
             _connectionContext.Vaga.Add(vaga);
             _connectionContext.SaveChanges();
         }
+        public Empresas GetEmpresaById(int id)
+        {
+            return _connectionContext.Empresa.SingleOrDefault(e => e.id == id);
+        }
 
         // Método para excluir uma candidatura  pelo ID
         public void DeleteCandidaturas(int id)
@@ -84,6 +93,15 @@ namespace JobApplication.Infraestrutura.Repositories
             if (vaga != null)
             {
                 _connectionContext.Vaga.Remove(vaga);
+                _connectionContext.SaveChanges();
+            }
+        }
+        public void DeleteEmpresas(int id)
+        {
+            var empresa = _connectionContext.Empresa.Find(id);
+            if(empresa != null)
+            {
+                _connectionContext.Empresa.Remove(empresa);
                 _connectionContext.SaveChanges();
             }
         }
@@ -121,8 +139,9 @@ namespace JobApplication.Infraestrutura.Repositories
         // Método para retornar um usuário específico pelo ID
         public Usuarios GetUsuariosById(int id)
         {
-            return _connectionContext.Usuario.Find(id);
+            return _connectionContext.Usuario.FirstOrDefault(u => u.id == id);
         }
+
 
         // Método para atualizar uma candidatura existente
         public void UpdateCandidaturas(Candidaturas candidatura)
@@ -147,7 +166,8 @@ namespace JobApplication.Infraestrutura.Repositories
             existingUser.email = usuario.email;
             existingUser.senha = usuario.senha;
             existingUser.perfil = usuario.perfil;
-            existingUser.data_criacao = DateTime.UtcNow;  
+            existingUser.data_criacao = DateTime.UtcNow;
+            
 
             _connectionContext.Usuario.Update(existingUser);
             _connectionContext.SaveChanges();
@@ -183,13 +203,16 @@ namespace JobApplication.Infraestrutura.Repositories
         // Método para retornar um usuário específico pelo email
         public Usuarios GetUsuariosByEmail(string email)
         {
-            return _connectionContext.Usuario.SingleOrDefault(u => u.email == email);
+            return _connectionContext.Usuario
+                .Include(u => u.Empresa)  // Inclui a entidade Empresa
+                .SingleOrDefault(u => u.email == email);
         }
+    
 
         // Método para retornar vagas com um status especifico
         public List<Vagas> GetVagasByStatus(string status)
         {
-            return _connectionContext.Vaga.Where(v => v.status == status).ToList();
+            return _connectionContext.Vaga.Include(v => v.Empresa).Where(v => v.status == status).ToList();
         }
 
         // Método para retornar vagas com um salario especifico
@@ -209,9 +232,15 @@ namespace JobApplication.Infraestrutura.Repositories
         {
             return _connectionContext.Candidatura.Include(c => c.candidato).Include(c => c.vaga).Where(c => c.id_vaga == id_vaga).ToList();
 
-
-
         }
+        public List<Vagas> GetVagasByEmpresaCnpj(string cnpj)
+        {
+            return _connectionContext.Vaga
+                .Include(v => v.Empresa) // Inclui a entidade Empresas
+                .Where(v => v.Empresa.cnpj == cnpj)
+                .ToList();
+        }
+
 
         // Método para retornar candidaturas por ID de recrutador, incluindo dados de candidato e vaga
         public List<Candidaturas> GetCandidaturasByIdRecrutador(int idRecrutador)
@@ -228,6 +257,7 @@ namespace JobApplication.Infraestrutura.Repositories
         {
             return _connectionContext.Candidatura
                 .Include(c => c.vaga)
+                .Include(c =>c.vaga.Empresa)
                 .Where(c => c.id_candidato == id_candidato)
                 .ToList();
         }
@@ -267,6 +297,9 @@ namespace JobApplication.Infraestrutura.Repositories
             return _connectionContext.Candidatura.Any(c => c.id_vaga == idVaga);
         }
 
+     
+
+      
     }
 }
 

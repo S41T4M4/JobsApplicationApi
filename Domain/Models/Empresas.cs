@@ -11,6 +11,7 @@ namespace JobApplication.Domain.Models
         public int id { get; set; }
         [Column("nome")]
         public string nome { get; set; }
+
         [Column("cnpj")]
         public string cnpj { get; set; }
     }

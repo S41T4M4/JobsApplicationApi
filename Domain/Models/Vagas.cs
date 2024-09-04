@@ -50,5 +50,14 @@ namespace JobApplication.Domain.Models
         [ForeignKey("id_recrutador")]
         public virtual Usuarios recrutador { get; set; }
 
+        // Navegação para a tabela de usuarios
+
+        [ForeignKey("Empresa")]
+        [Column("empresa_id")]
+        public int empresa_id { get; set; }
+
+        // Relação com a entidade Empresas
+        public virtual Empresas Empresa { get; set; }
+
     }
 }
