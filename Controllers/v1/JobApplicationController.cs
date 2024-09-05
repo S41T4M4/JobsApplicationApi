@@ -20,11 +20,41 @@ namespace JobApplication.Controllers.v1
         [HttpGet("empresas")]
         public IActionResult GetAllEmpresas()
         {
-            var empresas = _jobRepository.GetAllEmpresas();
+      
+            IQueryable<Empresas> query = _jobRepository.GetAllEmpresas();
+
+
+            //if (!string.IsNullOrEmpty(filtro))
+            //{
+            //    query = query.Where(e => e.nome.Contains(filtro));
+            //}
+
+         
+            //switch (ordem.ToLower())
+            //{
+            //    case "nome":
+            //        query = query.OrderBy(e => e.nome);
+            //        break;
+            //    case "cnpj":
+            //        query = query.OrderBy(e => e.cnpj);
+            //        break;
+            //    default:
+            //        query = query.OrderBy(e => e.nome);
+            //        break;
+            //}
+
+           
+            int pageNumber = 1;
+            int pageSize = 50;
+            query = query.Skip((pageNumber - 1) * pageSize).Take(pageSize);
+
+            
+            var empresas = query.ToList();
             return Ok(empresas);
         }
-        //Adicionar usuario do tipo Candidato 
-        [HttpPost("cadastro/usuarios")]
+    
+    // Adicionar usuário do tipo Candidato
+    [HttpPost("cadastro/usuarios")]
         public IActionResult AddCandidato([FromBody] UsuariosViewModel usuariosView)
         {
            
@@ -47,19 +77,19 @@ namespace JobApplication.Controllers.v1
                 email = usuariosView.Email,
                 senha = usuariosView.Senha,
                 perfil = "Candidato",  //Perfil do usuario é Candidato
-                empresa_id = null // Sempre null para candidatos
+                empresa_id = null 
             };
-            if (usuariosView.Nome == null)
+            if (string.IsNullOrEmpty(usuariosView.Nome))
             {
-                return BadRequest("O nome do usuario não pode ser vazio");
+                return BadRequest("O campo Nome tem que ser preenchido");
             }
-            if (usuariosView.Email == null)
+            if (string.IsNullOrEmpty(usuariosView.Email))
             {
-                return BadRequest("O campo email precisa ser preenchido");
+                return BadRequest("O campo Email tem que ser preenchido");
             }
-            if (usuariosView.Senha == null)
+            if (string.IsNullOrEmpty(usuariosView.Senha))
             {
-                return BadRequest("É preciso criar uma senha");
+                return BadRequest("O campo Senha tem que ser preenchido");
             }
             try
             {
@@ -71,7 +101,7 @@ namespace JobApplication.Controllers.v1
                 return StatusCode(500, $"Erro ao adicionar o candidato: {ex.Message}");
             }
         }
-
+        // Adicionar usuário do tipo Recrutador
         [HttpPost("cadastro/recrutador")]
         public IActionResult AddRecrutador([FromBody] RecrutadorViewModel recrutadorView)
         {
@@ -87,10 +117,21 @@ namespace JobApplication.Controllers.v1
                 return BadRequest("Usuário já existe.");
             }
 
-            //Como o perfil é Recrutador é necessario colocar o CNPJ
             if (string.IsNullOrEmpty(recrutadorView.Cnpj))
             {
                 return BadRequest("Recrutadores devem fornecer o CNPJ da empresa.");
+            }
+            if (string.IsNullOrEmpty(recrutadorView.Nome))
+            {
+                return BadRequest("O campo Nome tem que ser preenchido");
+            }
+            if (string.IsNullOrEmpty(recrutadorView.Email))
+            {
+                return BadRequest("O campo Email tem que ser preenchido");
+            }
+            if (string.IsNullOrEmpty(recrutadorView.Senha))
+            {
+                return BadRequest("O campo Senha tem que ser preenchido");
             }
 
             //Verificar se o CNPJ existe
@@ -137,11 +178,21 @@ namespace JobApplication.Controllers.v1
                 return BadRequest("Já existe uma empresa com este CNPJ.");
             }
 
+
             var empresa = new Empresas
             {
                 nome = empresasView.Name,
                 cnpj = empresasView.Cnpj
             };
+            if (string.IsNullOrWhiteSpace(empresasView.Name))
+            {
+                return BadRequest("O nome da empresa não pode ser vazio");
+            }
+            if (string.IsNullOrWhiteSpace(empresasView.Cnpj))
+            {
+                return BadRequest("O cnpj não pode ser vazio");
+            }
+
 
             try
             {
@@ -166,7 +217,7 @@ namespace JobApplication.Controllers.v1
         [HttpPut("usuarios/{id}")]
         public IActionResult UpdateUser(int id, UsuariosViewModel usuariosView)
         {
-            // Procurar o usuário existente pelo id
+            
             var existingUser = _jobRepository.GetUsuariosById(id);
             
             if (existingUser == null)
@@ -175,13 +226,26 @@ namespace JobApplication.Controllers.v1
                 return NotFound(new { Message = "Usuário não encontrado" });
             }
 
-            // Atualizar as propriedades do usuário com as informações do ViewModel
+            
             existingUser.nome = usuariosView.Nome;
             existingUser.email = usuariosView.Email;
             existingUser.senha = usuariosView.Senha;
             existingUser.perfil = usuariosView.Perfil;
 
-            
+            if (string.IsNullOrEmpty(usuariosView.Nome))
+            {
+                return BadRequest("O campo Nome tem que ser preenchido");
+            }
+            if (string.IsNullOrEmpty(usuariosView.Email))
+            {
+                return BadRequest("O campo Email tem que ser preenchido");
+            }
+            if (string.IsNullOrEmpty(usuariosView.Senha))
+            {
+                return BadRequest("O campo Senha tem que ser preenchido");
+            }
+
+
             _jobRepository.UpdateUsuarios(existingUser);
 
             return Ok(new { Message = "Usuário atualizado com sucesso" });
@@ -259,15 +323,21 @@ namespace JobApplication.Controllers.v1
             var vagas = _jobRepository.GetAllVagas();
             return Ok(vagas);
         }
-   
+
         [HttpGet("vagas/status/fechada")]
         public IActionResult GetVagasByStatusFechada()
         {
-            //Retorna apenas vagas fechadas
+
             var vagasFechadas = _jobRepository.GetVagasByStatus("Fechada");
             return Ok(vagasFechadas);
         }
-        
+        [HttpGet("vagas/nomeEmpresa")]
+        public IActionResult GetVagasByEmpresa(string nome)
+        {
+            var nomeEmpresa = _jobRepository.GetVagasByEmpresa(nome);
+            return Ok(nomeEmpresa);
+        }
+
         [HttpPut("vagas/{id}")]
         public IActionResult UpdateVagas(int id, [FromBody] VagasViewModel vagasViewModel)
         {
@@ -289,10 +359,7 @@ namespace JobApplication.Controllers.v1
             existingVaga.status = vagasViewModel.Status;
             existingVaga.id_recrutador = vagasViewModel.IdRecrutador;
 
-            if (vagasViewModel == null)
-            {
-                return BadRequest("Os dados da vaga não podem ser nulos.");
-            }
+           
             if (string.IsNullOrWhiteSpace(vagasViewModel.Titulo))
             {
                 return BadRequest("O titulo não pode ser vazio !");
@@ -357,7 +424,7 @@ namespace JobApplication.Controllers.v1
         }
      
 
-        // Método para candidatar-se a uma vaga
+        
         [HttpPost("candidaturas")]
         public IActionResult ApplyForJob([FromBody] CandidaturasViewModel candidaturasViewModel)
         {
@@ -404,7 +471,7 @@ namespace JobApplication.Controllers.v1
             return Ok();
         }
 
-        // Método para obter uma candidatura pelo ID
+        
         [HttpGet("candidaturas/{id}")]
         public IActionResult GetCandidaturaById(int id)
         {

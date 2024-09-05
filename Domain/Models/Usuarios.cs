@@ -34,7 +34,7 @@ namespace JobApplication.Domain.Models
         [Column("data_criacao")]
         public DateTime data_criacao { get; set; } = DateTime.UtcNow;
 
-        // Nova coluna empresa_id, que pode ser nula para perfis que não são recrutadores
+        //Pode ser nula para perfis não recrutadores 
         [ForeignKey("Empresa")]
         [Column("empresa_id")]
         public int? empresa_id { get; set; }
