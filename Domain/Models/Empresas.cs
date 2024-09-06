@@ -14,5 +14,6 @@ namespace JobApplication.Domain.Models
 
         [Column("cnpj")]
         public string cnpj { get; set; }
+
     }
 }

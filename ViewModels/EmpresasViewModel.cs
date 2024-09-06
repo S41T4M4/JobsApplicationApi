@@ -1,5 +1,6 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Text.Json.Serialization;
 
 namespace JobApplication.ViewModels
@@ -12,6 +13,7 @@ namespace JobApplication.ViewModels
         public string Name { get; set; }
         [JsonPropertyName("cnpj")]
         public string Cnpj { get; set; }
+
 
     }
 }

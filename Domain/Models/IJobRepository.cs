@@ -4,6 +4,7 @@ namespace JobApplication.Domain.Models
 {
     public interface IJobRepository
     {
+        
         Empresas GetEmpresaById(int id);
         List<Vagas> GetVagasByEmpresa(string nome);
         List<Vagas> GetVagasByEmpresaCnpj(string cnpj);
@@ -13,7 +14,7 @@ namespace JobApplication.Domain.Models
         void DeleteEmpresas(int id);
 
         void AddUsuarios(Usuarios usuario);
-        List<Usuarios> GetAllUsuarios();
+        IQueryable<Usuarios> GetAllUsuarios();
         Usuarios GetUsuariosById(int id);
         void UpdateUsuarios(Usuarios usuario);
         void DeleteUsuarios(int id);

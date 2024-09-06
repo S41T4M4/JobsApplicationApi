@@ -114,9 +114,9 @@ namespace JobApplication.Infraestrutura.Repositories
         }
 
         
-        public List<Usuarios> GetAllUsuarios()
+        public IQueryable<Usuarios> GetAllUsuarios()
         {
-            return _connectionContext.Usuario.ToList();
+            return _connectionContext.Usuario;
         }
 
         

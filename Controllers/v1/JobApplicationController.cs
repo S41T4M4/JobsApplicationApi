@@ -17,44 +17,9 @@ namespace JobApplication.Controllers.v1
         {
             _jobRepository = jobRepository;
         }
-        [HttpGet("empresas")]
-        public IActionResult GetAllEmpresas()
-        {
-      
-            IQueryable<Empresas> query = _jobRepository.GetAllEmpresas();
-
-
-            //if (!string.IsNullOrEmpty(filtro))
-            //{
-            //    query = query.Where(e => e.nome.Contains(filtro));
-            //}
-
-         
-            //switch (ordem.ToLower())
-            //{
-            //    case "nome":
-            //        query = query.OrderBy(e => e.nome);
-            //        break;
-            //    case "cnpj":
-            //        query = query.OrderBy(e => e.cnpj);
-            //        break;
-            //    default:
-            //        query = query.OrderBy(e => e.nome);
-            //        break;
-            //}
-
-           
-            int pageNumber = 1;
-            int pageSize = 50;
-            query = query.Skip((pageNumber - 1) * pageSize).Take(pageSize);
-
-            
-            var empresas = query.ToList();
-            return Ok(empresas);
-        }
-    
-    // Adicionar usuário do tipo Candidato
-    [HttpPost("cadastro/usuarios")]
+   
+        // Adicionar usuário do tipo Candidato
+        [HttpPost("cadastro/usuarios")]
         public IActionResult AddCandidato([FromBody] UsuariosViewModel usuariosView)
         {
            
@@ -66,8 +31,6 @@ namespace JobApplication.Controllers.v1
                 return BadRequest("Usuário já existe.");
             }
 
-            
-           
             //Empresa id é null pois o tipo de usuario é Candidato
             usuariosView.EmpresaId = null;
 
@@ -101,7 +64,7 @@ namespace JobApplication.Controllers.v1
                 return StatusCode(500, $"Erro ao adicionar o candidato: {ex.Message}");
             }
         }
-        // Adicionar usuário do tipo Recrutador
+        
         [HttpPost("cadastro/recrutador")]
         public IActionResult AddRecrutador([FromBody] RecrutadorViewModel recrutadorView)
         {
@@ -164,7 +127,7 @@ namespace JobApplication.Controllers.v1
 
         
         [HttpPost("cadastro/empresas")]
-        public IActionResult AddEmpresa([FromBody] EmpresasViewModel empresasView)
+        public IActionResult AddEmpresa([FromForm] EmpresasViewModel empresasView)
         {
             if (empresasView == null)
             {
@@ -177,12 +140,12 @@ namespace JobApplication.Controllers.v1
             {
                 return BadRequest("Já existe uma empresa com este CNPJ.");
             }
-
-
+           
             var empresa = new Empresas
             {
                 nome = empresasView.Name,
-                cnpj = empresasView.Cnpj
+                cnpj = empresasView.Cnpj,
+                
             };
             if (string.IsNullOrWhiteSpace(empresasView.Name))
             {
@@ -208,11 +171,62 @@ namespace JobApplication.Controllers.v1
 
 
         [HttpGet("usuarios")]
-        public IActionResult GetUsers()
+        public IActionResult GetUsers([FromQuery] string filtro , [FromQuery] string ordem = "email")
         {
-            
-            var users = _jobRepository.GetAllUsuarios();
+            IQueryable<Usuarios> query = _jobRepository.GetAllUsuarios();
+
+            if (!string.IsNullOrEmpty(filtro))
+            {
+                query = query.Where(u => u.email.Contains(filtro));
+            }
+            switch (ordem.ToLower())
+            {
+                case "email":
+                    query = query.OrderBy(u => u.email);
+                    break;
+                case "nome":
+                    query = query.OrderBy(u => u.nome);
+                    break;
+
+            }
+
+
+            var users = query.ToList();
             return Ok(users);
+        }
+        [HttpGet("empresas")]
+        public IActionResult GetAllEmpresas([FromQuery] string filtro, [FromQuery] string ordem = "nome")
+        {
+       
+            IQueryable<Empresas> query = _jobRepository.GetAllEmpresas();
+
+
+            if (!string.IsNullOrEmpty(filtro))
+            {
+                query = query.Where(e => e.nome.Contains(filtro));
+            }
+
+            switch (ordem.ToLower())
+            {
+                case "nome":
+                    query = query.OrderBy(e => e.nome);
+                    break;
+                case "cnpj":
+                    query = query.OrderBy(e => e.cnpj);
+                    break;
+                default:
+                    query = query.OrderBy(e => e.nome);
+                    break;
+            }
+
+
+            int pageNumber = 1;
+            int pageSize = 10;
+            query = query.Skip((pageNumber - 1) * pageSize).Take(pageSize);
+
+            
+            var empresas = query.ToList();
+            return Ok(empresas);
         }
         [HttpPut("usuarios/{id}")]
         public IActionResult UpdateUser(int id, UsuariosViewModel usuariosView)
@@ -335,7 +349,12 @@ namespace JobApplication.Controllers.v1
         public IActionResult GetVagasByEmpresa(string nome)
         {
             var nomeEmpresa = _jobRepository.GetVagasByEmpresa(nome);
-            return Ok(nomeEmpresa);
+            if (string.IsNullOrEmpty(nome))
+            {
+                return BadRequest("O nome da empresa não pode ser vazio ");
+            }    
+                return Ok(nomeEmpresa);
+    
         }
 
         [HttpPut("vagas/{id}")]
