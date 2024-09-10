@@ -14,15 +14,15 @@ namespace JobApplication.Domain.Models
         [Required]
         [Column("titulo")]
         [StringLength(255)]
-        public string titulo { get; set; }
+        public required string titulo { get; set; }
 
         [Required]
         [Column("descricao")]
-        public string descricao { get; set; }
+        public required string descricao { get; set; }
 
         [Required]
         [Column("requisitos")]
-        public string requisitos { get; set; }
+        public required string requisitos { get; set; }
 
         [Required]
         [Column("salario")]
@@ -32,12 +32,12 @@ namespace JobApplication.Domain.Models
         [Required]
         [Column("localizacao")]
         [StringLength(255)]
-        public string localizacao { get; set; }
+        public required string localizacao { get; set; }
 
         [Required]
         [Column("status")]
         [StringLength(50)]
-        public string status { get; set; }
+        public required string status { get; set; }
 
         [Required]
         [Column("id_recrutador")]
@@ -46,20 +46,13 @@ namespace JobApplication.Domain.Models
         [Column("data_criacao")]
         public DateTime data_criacao { get; set; } = DateTime.UtcNow;
 
-        // Navegação para a tabela de usuarios
         [ForeignKey("id_recrutador")]
         public virtual Usuarios recrutador { get; set; }
-
-        // Navegação para a tabela de usuarios
 
         [ForeignKey("Empresa")]
         [Column("empresa_id")]
         public int empresa_id { get; set; }
 
-        // Relação com a entidade Empresas
         public virtual Empresas Empresa { get; set; }
-
-       
-
     }
 }

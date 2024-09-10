@@ -10,10 +10,10 @@ namespace JobApplication.Domain.Models
         [Column("id")]
         public int id { get; set; }
         [Column("nome")]
-        public string nome { get; set; }
+        public required string nome { get; set; }
 
         [Column("cnpj")]
-        public string cnpj { get; set; }
+        public required string cnpj { get; set; }
 
     }
 }

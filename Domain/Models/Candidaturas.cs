@@ -22,19 +22,15 @@ namespace JobApplication.Domain.Models
         [Required]
         [Column("status")]
         [StringLength(50)]
-        public string status { get; set; }
+        public required string status { get; set; }
 
         [Column("data_candidatura")]
         public DateTime data_candidatura { get; set; } = DateTime.Now;
 
-        // Navegação para as tabelas de vagas e candidatos 
         [ForeignKey("id_vaga")]
         public virtual Vagas vaga { get; set; }
 
         [ForeignKey("id_candidato")]
         public virtual Usuarios candidato { get; set; }
-
-
-       
     }
 }

@@ -14,32 +14,30 @@ namespace JobApplication.Domain.Models
         [Required]
         [Column("nome")]
         [StringLength(100)]
-        public string nome { get; set; }
+        public required string nome { get; set; }
 
         [Required]
         [Column("email")]
         [StringLength(100)]
-        public string email { get; set; }
+        public required string email { get; set; }
 
         [Required]
         [Column("senha")]
         [StringLength(255)]
-        public string senha { get; set; }
+        public required string senha { get; set; }
 
         [Required]
         [Column("perfil")]
         [StringLength(50)]
-        public string perfil { get; set; }
+        public required string perfil { get; set; }
 
         [Column("data_criacao")]
         public DateTime data_criacao { get; set; } = DateTime.UtcNow;
 
-        //Pode ser nula para perfis não recrutadores 
         [ForeignKey("Empresa")]
         [Column("empresa_id")]
         public int? empresa_id { get; set; }
 
-        // Relação com a entidade Empresas
         public virtual Empresas Empresa { get; set; }
     }
 }
