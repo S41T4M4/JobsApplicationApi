@@ -29,6 +29,7 @@ namespace JobApplication.ViewModels
         public int IdEmpresa { get; set; }
 
         public string? Nome { get; set; }
+     
 
     }
 }

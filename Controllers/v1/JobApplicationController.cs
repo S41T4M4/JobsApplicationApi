@@ -127,12 +127,21 @@ namespace JobApplication.Controllers.v1
 
         
         [HttpPost("cadastro/empresas")]
-        public IActionResult AddEmpresa([FromForm] EmpresasViewModel empresasView)
+        public IActionResult AddEmpresa([FromBody] EmpresasViewModel empresasView)
         {
             if (empresasView == null)
             {
                 return BadRequest("O formato não pode ser nulo.");
             }
+            if (string.IsNullOrWhiteSpace(empresasView.Name))
+            {
+                return BadRequest("O nome da empresa não pode ser vazio");
+            }
+            if (string.IsNullOrWhiteSpace(empresasView.Cnpj))
+            {
+                return BadRequest("O cnpj não pode ser vazio");
+            }
+
 
             var empresaExistente = _jobRepository.GetEmpresaByCnpj(empresasView.Cnpj);
 
@@ -147,15 +156,7 @@ namespace JobApplication.Controllers.v1
                 cnpj = empresasView.Cnpj,
                 
             };
-            if (string.IsNullOrWhiteSpace(empresasView.Name))
-            {
-                return BadRequest("O nome da empresa não pode ser vazio");
-            }
-            if (string.IsNullOrWhiteSpace(empresasView.Cnpj))
-            {
-                return BadRequest("O cnpj não pode ser vazio");
-            }
-
+           
 
             try
             {
@@ -218,8 +219,6 @@ namespace JobApplication.Controllers.v1
                     query = query.OrderBy(e => e.nome);
                     break;
             }
-
-
             int pageNumber = 1;
             int pageSize = 10;
             query = query.Skip((pageNumber - 1) * pageSize).Take(pageSize);
@@ -415,10 +414,7 @@ namespace JobApplication.Controllers.v1
                 return Ok(new { Message = "Vaga atualizada com sucesso" });
 
             }
-            //data_criacao
-            // É mantido a data de criação da vaga
 
-            
            
         }
 
@@ -441,9 +437,7 @@ namespace JobApplication.Controllers.v1
             var candidaturaId = _jobRepository.GetAllCandidaturasByIdCandidato(id_candidato);
             return Ok(candidaturaId);
         }
-     
-
-        
+             
         [HttpPost("candidaturas")]
         public IActionResult ApplyForJob([FromBody] CandidaturasViewModel candidaturasViewModel)
         {
@@ -581,6 +575,7 @@ namespace JobApplication.Controllers.v1
 
             return Ok(vagas);
         }
+       
 
         [HttpGet("candidatos/{id_vaga}")]
         public IActionResult GetCandidaturasByVaga(int id_vaga)
@@ -622,6 +617,7 @@ namespace JobApplication.Controllers.v1
                 Salario = c.salario,
                 Status = c.status,
                 Nome = c.Empresa.nome,
+                
 
 
             }).ToList();

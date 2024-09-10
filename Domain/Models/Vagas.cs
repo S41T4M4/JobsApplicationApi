@@ -59,5 +59,7 @@ namespace JobApplication.Domain.Models
         // Relação com a entidade Empresas
         public virtual Empresas Empresa { get; set; }
 
+       
+
     }
 }
