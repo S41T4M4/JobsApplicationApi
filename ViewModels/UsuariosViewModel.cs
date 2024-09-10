@@ -1,14 +1,21 @@
-﻿namespace JobApplication.ViewModels
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace JobApplication.ViewModels
 {
     public class UsuariosViewModel
     {
-        public string Nome { get; set; }
-        public string Email { get; set; }
-        public string Senha { get; set; }
-        public string Perfil { get; set; }
-        public int? EmpresaId { get; set; }
-        //public string Cnpj { get; set; }
-        //public string NomeEmpresa { get; set; } // Nome da empresa para criar
-    }
+        [Required]
+        public string Nome { get; set; } = string.Empty;
 
+        [Required]
+        public string Email { get; set; } = string.Empty;
+
+        [Required]
+        public string Senha { get; set; } = string.Empty;
+
+        [Required]
+        public string Perfil { get; set; } = string.Empty;
+
+        public int? EmpresaId { get; set; } // Pode ser nulo se não for sempre necessário
+    }
 }
