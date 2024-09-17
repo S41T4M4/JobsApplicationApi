@@ -1,23 +1,21 @@
-# Etapa 1: Imagem base de construção
-FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build-env
+FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS base
+USER app
 WORKDIR /app
+EXPOSE 8080
 
-# Copia os arquivos publicados (a pasta que você já tem)
-COPY . ./
 
-# Restaura as dependências e publica a aplicação
-RUN dotnet restore
-RUN dotnet publish -c Release -o out
+FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
+WORKDIR /src
+COPY ["JobApplication/JobApplication.csproj", "JobApplication/"]
+RUN dotnet restore "./JobApplication/JobApplication.csproj"
+COPY . .
+WORKDIR "/src/JobApplication"
+RUN dotnet build "./JobApplication.csproj" -c Release -o /app/build
 
-# Etapa 2: Imagem final para execução
-FROM mcr.microsoft.com/dotnet/aspnet:8.0
+FROM build AS publish
+RUN dotnet publish "./JobApplication.csproj" -c Release -o /app/publish /p:UseAppHost=false
+
+FROM base AS final
 WORKDIR /app
-
-# Copiar os arquivos da etapa de construção para a imagem final
-COPY --from=build-env /app/out .
-
-# Expor a porta que a aplicação vai rodar (normalmente 80 ou 5000)
-EXPOSE 80
-
-# Comando de entrada para rodar o app
+COPY --from=publish /app/publish .
 ENTRYPOINT ["dotnet", "JobApplication.dll"]

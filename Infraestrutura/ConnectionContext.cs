@@ -15,7 +15,7 @@ namespace JobApplication.Infraestrutura
         //String de conexão 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
          => optionsBuilder.UseNpgsql(
-             "Server=localhost;" +
+             "Server=database-postgres;" +
              "Port=5432;Database=job_application;" +
              "User Id=postgres;" +
              "Password=Staff4912;");
